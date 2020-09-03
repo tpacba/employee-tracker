@@ -14,6 +14,18 @@ connection.connect(function(err) {
     start();
 });
 
+// function start() {
+//     var array = [];
+//     connection.query(
+//         "SELECT * FROM department",
+//         function(err, data) {
+//             if(err) throw err;
+//             array.push(data);
+//             console.log(array)
+//         }
+//     )
+// }
+
 function start() {
     inquirer
         .prompt({
@@ -108,4 +120,49 @@ function addDepartments() {
                 }
             )
         })
+}
+
+function addRoles() {
+    var departmentData = [];
+    connection.query(
+        "SELECT name FROM department",
+        function(err, data) {
+            data.forEach(function(item) {
+                departmentData.push(item.name)
+            });
+        }
+    )
+
+    inquirer
+        .prompt([
+            {
+                name: "name",
+                type: "input",
+                message: "What is the name of this role (to add)?"
+            },
+            {
+                name: "salary",
+                type: "input",
+                message: "What is the salary of this role?"
+            },
+            {
+                name: "department",
+                type: "list",
+                message: "Which department does this role belong in?",
+                choices: departmentData
+            }
+        ])
+        // .then(function(answer) {
+        //     connection.query(
+        //         "INSERT INTO role SET ?",
+        //         {
+        //             name: answer.name
+        //         },
+        //         function(err) {
+        //             if (err) throw err;
+        //             console.log(`You added the department ${answer.name} successfully!`)
+        //             start();
+        //         }
+        //     )
+        // })
 }
