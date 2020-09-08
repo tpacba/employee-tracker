@@ -125,11 +125,10 @@ function addDepartments() {
 function addRoles() {
     var departmentData = [];
     connection.query(
-        "SELECT name FROM department",
+        "SELECT * FROM department",
         function(err, data) {
-            data.forEach(function(item) {
-                departmentData.push(item.name)
-            });
+            if (err) throw err;
+            departmentData = data;
         }
     )
 
@@ -146,23 +145,126 @@ function addRoles() {
                 message: "What is the salary of this role?"
             },
             {
-                name: "department",
+                name: "departmentName",
                 type: "list",
                 message: "Which department does this role belong in?",
-                choices: departmentData
+                choices: function() {
+                    var departmentChoices = [];
+                    for (const item of departmentData) {
+                        departmentChoices.push(item.name);
+                    }
+                    return departmentChoices;
+                }
             }
         ])
-        // .then(function(answer) {
-        //     connection.query(
-        //         "INSERT INTO role SET ?",
-        //         {
-        //             name: answer.name
-        //         },
-        //         function(err) {
-        //             if (err) throw err;
-        //             console.log(`You added the department ${answer.name} successfully!`)
-        //             start();
-        //         }
-        //     )
-        // })
+        .then(function(answer) {
+            var id;
+            for (const item of departmentData) {
+                if (answer.departmentName == item.name) {
+                    id = item.id;
+                }
+            }
+
+            connection.query(
+                "INSERT INTO role SET ?",
+                {
+                    name: answer.name,
+                    salary: answer.salary,
+                    department_id: id
+                },
+                function(err) {
+                    if (err) throw err;
+                    console.log(`You added the role ${answer.name}, ${answer.salary}, ${answer.departmentName} successfully!`)
+                    start();
+                }
+            )
+        })
+}
+
+function addEmployees() {
+    var roleData = [];
+    connection.query(
+        "SELECT * FROM role",
+        function (err, data) {
+            if (err) throw err;
+            roleData = data;
+        }
+    )
+
+    var employeeData = [];
+    connection.query(
+        "SELECT * FROM employee",
+        function (err, data) {
+            if (err) throw err;
+            employeeData = data;
+        }
+    )
+
+    inquirer
+        .prompt([
+            {
+                name: "firstname",
+                type: "input",
+                message: "What is the employee's first name?"
+            },
+            {
+                name: "lastname",
+                type: "input",
+                message: "What is the employee's last name?"
+            },
+            {
+                name: "roleName",
+                type: "list",
+                message: "What is the employee's role?",
+                choices: function() {
+                    var roleChoices = [];
+                    for (const item of roleData) {
+                        roleChoices.push(item.name);
+                    }
+                    return roleChoices;
+                }
+            },
+            {
+                name: "managerName",
+                type: "list",
+                message: "Who is the employee's manager?",
+                choices: function() {
+                    var managerChoices = ["null"];
+                    for (const item of employeeData) {
+                        managerChoices.push(item.last_name);
+                    }
+                    return managerChoices;
+                }
+            }
+        ])
+        .then(function(answer) {
+            var roleID;
+            for (const item of roleData) {
+                if (answer.roleName == item.name) {
+                    roleID = item.id;
+                }
+            }
+
+            var managerID = null;
+            for (const item of employeeData) {
+                if (answer.managerName == item.last_name) {
+                    managerID = item.id;
+                }
+            }
+
+            connection.query(
+                "INSERT INTO employee SET ?",
+                {
+                    first_name: answer.firstname,
+                    last_name: answer.lastname,
+                    role_id: roleID,
+                    manager_id: managerID
+                },
+                function(err) {
+                    if (err) throw err;
+                    console.log(`You added the employee ${answer.lastname}, ${answer.roleName} successfully!`)
+                    start();
+                }
+            )
+        })
 }
