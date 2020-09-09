@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var ctable = require("console.table");
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -13,18 +14,6 @@ connection.connect(function(err) {
     if (err) throw err;
     start();
 });
-
-// function start() {
-//     var array = [];
-//     connection.query(
-//         "SELECT * FROM department",
-//         function(err, data) {
-//             if(err) throw err;
-//             array.push(data);
-//             console.log(array)
-//         }
-//     )
-// }
 
 function start() {
     inquirer
@@ -81,13 +70,13 @@ function view() {
             message: "What would you like to view?",
             choices: ["Departments", "Roles", "Employees"]
         }).then(function(answer) {
-            if (answer.addWhat === "Departments") {
+            if (answer.viewWhat === "Departments") {
                 viewDepartments();
             }
-            else if (answer.addWhat === "Roles") {
+            else if (answer.viewWhat === "Roles") {
                 viewRoles();
             }
-            else if (answer.addWhat === "Employees") {
+            else if (answer.viewWhat === "Employees") {
                 viewEmployees();
             }
             else {
@@ -268,3 +257,42 @@ function addEmployees() {
             )
         })
 }
+
+function viewDepartments() {
+    console.log("View Departments");
+
+    connection.query(
+        "SELECT * FROM department",
+        function(err, data) {
+            if (err) throw err;
+            console.table(data);
+            start();
+        }
+    )
+};
+
+function viewRoles() {
+    console.log("View Roles");
+
+    connection.query(
+        "SELECT role.id, role.name AS role, role.salary, department.name AS department FROM role INNER JOIN department ON role.department_id = department.id;",
+        function(err, data) {
+            if (err) throw err;
+            console.table(data);
+            start();
+        }
+    )
+};
+
+function viewEmployees() {
+    console.log("View Employees");
+
+    connection.query(
+        "SELECT * FROM employee",
+        function(err, data) {
+            if (err) throw err;
+            console.table(data);
+            start();
+        }
+    )
+};
