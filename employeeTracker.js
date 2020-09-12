@@ -287,9 +287,16 @@ function viewRoles() {
 function viewEmployees() {
     console.log("View Employees");
 
-    connection.query(
-        "SELECT * FROM employee",
-        function(err, data) {
+    connection.query(`
+        drop table if exists manager;
+        create table manager(
+            id INT NOT NULL AUTO_INCREMENT,
+            last_name VARCHAR(30) NOT NULL,
+            PRIMARY KEY (id)
+        );
+        insert into manager (last_name) select last_name from employee;
+        select employee.id, employee.first_name, employee.last_name, role.name AS role, manager.last_name as manager from employee left join role ON employee.role_id = role.id left join manager on employee.manager_id = manager.id;
+        `, function(err, data) {
             if (err) throw err;
             console.table(data);
             start();
