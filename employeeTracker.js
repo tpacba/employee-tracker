@@ -287,19 +287,28 @@ function viewRoles() {
 function viewEmployees() {
     console.log("View Employees");
 
-    connection.query(`
-        drop table if exists manager;
-        create table manager(
-            id INT NOT NULL AUTO_INCREMENT,
-            last_name VARCHAR(30) NOT NULL,
-            PRIMARY KEY (id)
-        );
-        insert into manager (last_name) select last_name from employee;
-        select employee.id, employee.first_name, employee.last_name, role.name AS role, manager.last_name as manager from employee left join role ON employee.role_id = role.id left join manager on employee.manager_id = manager.id;
-        `, function(err, data) {
-            if (err) throw err;
-            console.table(data);
-            start();
+    connection.query(
+        "TRUNCATE TABLE manager",
+        function(err) {
+            if (err) throw (err);
+            console.log("TRUNCATE TABLE manager");
+
+            connection.query(
+                "INSERT INTO manager (last_name) SELECT last_name FROM employee",
+                function(err) {
+                    if (err) throw (err);
+                    console.log("INSERT INTO manager (last_name) SELECT last_name FROM employee");
+
+                    connection.query(
+                        "SELECT employee.id, employee.first_name, employee.last_name, role.name AS role, manager.last_name AS manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN manager ON employee.manager_id = manager.id",
+                        function(err, data) {
+                            if(err) throw err;
+                            console.table(data);
+                            start();
+                        }
+                    )
+                }
+            )
         }
     )
 };
