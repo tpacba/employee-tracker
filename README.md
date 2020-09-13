@@ -9,7 +9,7 @@
 
 The application is a CMS (**C**ontent **M**anagement **S**ystems) interface that views and interacts with a proposed company's stored employee information using node, inquirer, and MySQL.
 
-The application is design with the following database schema containing three tables:
+The application is designed with the following database schema containing three tables:
 
 * **department**
 * **role**
