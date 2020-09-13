@@ -288,25 +288,25 @@ function viewEmployees() {
     console.log("View Employees");
 
     connection.query(
-        "DROP TABLE IF EXISTS manager",
+        "CREATE TABLE manager (id INT NOT NULL AUTO_INCREMENT, last_name VARCHAR(30) NOT NULL, PRIMARY KEY (id))",
         function(err) {
             if (err) throw err;
 
             connection.query(
-                "CREATE TABLE manager (id INT NOT NULL AUTO_INCREMENT, last_name VARCHAR(30) NOT NULL, PRIMARY KEY (id))",
+                "INSERT INTO manager (last_name) SELECT last_name FROM employee",
                 function(err) {
-                    if (err) throw err;
+                    if (err) throw (err);
 
                     connection.query(
-                        "INSERT INTO manager (last_name) SELECT last_name FROM employee",
-                        function(err) {
-                            if (err) throw (err);
+                        "SELECT employee.id, employee.first_name, employee.last_name, role.name AS role, manager.last_name AS manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN manager ON employee.manager_id = manager.id",
+                        function(err, data) {
+                            if(err) throw err;
+                            console.table(data);
 
                             connection.query(
-                                "SELECT employee.id, employee.first_name, employee.last_name, role.name AS role, manager.last_name AS manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN manager ON employee.manager_id = manager.id",
-                                function(err, data) {
-                                    if(err) throw err;
-                                    console.table(data);
+                                "DROP TABLE manager",
+                                function(err) {
+                                    if (err) throw err;
                                     start();
                                 }
                             )
@@ -316,7 +316,6 @@ function viewEmployees() {
             )
         }
     )
-
 };
 
 // CREATE TABLE manager (id INT NOT NULL AUTO_INCREMENT, last_name VARCHAR(30) NOT NULL, PRIMARY KEY (id));
