@@ -288,27 +288,41 @@ function viewEmployees() {
     console.log("View Employees");
 
     connection.query(
-        "TRUNCATE TABLE manager",
+        "DROP TABLE IF EXISTS manager",
         function(err) {
-            if (err) throw (err);
-            console.log("TRUNCATE TABLE manager");
+            if (err) throw err;
 
             connection.query(
-                "INSERT INTO manager (last_name) SELECT last_name FROM employee",
+                "CREATE TABLE manager (id INT NOT NULL AUTO_INCREMENT, last_name VARCHAR(30) NOT NULL, PRIMARY KEY (id))",
                 function(err) {
-                    if (err) throw (err);
-                    console.log("INSERT INTO manager (last_name) SELECT last_name FROM employee");
+                    if (err) throw err;
 
                     connection.query(
-                        "SELECT employee.id, employee.first_name, employee.last_name, role.name AS role, manager.last_name AS manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN manager ON employee.manager_id = manager.id",
-                        function(err, data) {
-                            if(err) throw err;
-                            console.table(data);
-                            start();
+                        "INSERT INTO manager (last_name) SELECT last_name FROM employee",
+                        function(err) {
+                            if (err) throw (err);
+
+                            connection.query(
+                                "SELECT employee.id, employee.first_name, employee.last_name, role.name AS role, manager.last_name AS manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN manager ON employee.manager_id = manager.id",
+                                function(err, data) {
+                                    if(err) throw err;
+                                    console.table(data);
+                                    start();
+                                }
+                            )
                         }
                     )
                 }
             )
         }
     )
+
 };
+
+// CREATE TABLE manager (id INT NOT NULL AUTO_INCREMENT, last_name VARCHAR(30) NOT NULL, PRIMARY KEY (id));
+// INSERT INTO manager (last_name) SELECT last_name FROM employee;
+// SELECT employee.id, employee.first_name, employee.last_name, role.name AS role, manager.last_name AS manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN manager ON employee.manager_id = manager.id;
+
+
+
+
